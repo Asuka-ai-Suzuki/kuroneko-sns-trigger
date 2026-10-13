@@ -1,0 +1,25 @@
+name: wake-weekly-kit
+
+# 毎週日曜 20:00（日本時間）に、TikTok・LINE・Lemon8 用の手動投稿キットを作らせる。cron はUTCなので -9時間。
+on:
+  schedule:
+    - cron: "7 11 * * 0"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 手動投稿キットを作らせる
+        env:
+          GH_TOKEN: ${{ secrets.AUTOPOST_DISPATCH_TOKEN }}
+        run: gh workflow run weekly-kit.yml -R Asuka-ai-Suzuki/kuroneko-sns-autopost --ref main
+
+      - name: このワークフローが60日の休眠で止められないようにする
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/weekly.yml/enable"
